@@ -61,7 +61,7 @@ function Group:draw(camera)
             -- ตรรกะ Frustum Culling (คัดกรองขอบเขตสายตา):
             -- ถ้าระบบกล้องระบุว่าวัตถุนี้อยู่นอกพื้นที่หน้าจอ มือถือจะไม่ต้องแบกรับภาระส่งข้อมูลไปการ์ดจอ
             local in_view = true
-            if camera and camera.isBoundsOut and ent.x and ent.y then
+            if camera and camera.isBoundsIn and ent.x and ent.y then
                 in_view = camera:isBoundsIn(ent.x, ent.y, ent.width or 32, ent.height or 32)
             end
 

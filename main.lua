@@ -18,8 +18,6 @@ function love.load()
     controller.init(love.graphics.getWidth(), love.graphics.getHeight()) 
     
     myCamera = Camera.new(virtualWidth, virtualHeight)
-    myCamera:setAngle(45) 
-    myCamera:setZoom(1.0)
     
     -- =======================================================
     -- [แก้ไข]: โหลดและลงทะเบียนฉากตรงนี้ เพื่อให้ StateManager รู้จักครบทุกฉากก่อนเริ่มเกม
