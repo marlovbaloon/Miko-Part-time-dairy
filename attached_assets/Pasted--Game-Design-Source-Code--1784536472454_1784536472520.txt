@@ -1,0 +1,24 @@
+นี่คือโครงสร้าง Game Design และ Source Code ระบบต่อสู้ของเกมฉัน [แนบโค้ดทั้งหมดหรือสรุปด้านบน] ช่วยตรวจสอบและปรับปรุงระบบในแง่ของ Game Balance โดยเน้นไปที่การเขียนลอจิกดักจับโควตา 'Perfect Dodge 3 ครั้งต่อการต่อสู้' ในไฟล์ bullet_hell.lua และ structs.lua พร้อมปรับแต่งให้บัฟ Haste ทำงานถูกต้องแม่นยำ 30% ในตาถัดไปเมื่อผู้เล่นพลาดโดนโจมตี 
+1. Core Gameplay Loop & Mechanics
+ระบบต่อสู้เป็นแบบลูกผสม Hybrid RPG ที่ผสานระหว่างกลยุทธ์และการตอบสนองอย่างฉับพลัน (Active Strategic Combat):
+Command Phase (ATB System): อ้างอิงระบบจาก Final Fantasy VI ใช้เกจ ATB ในการกำหนดสิทธิ์การออกคำสั่ง (Attack, Item, Act, SP) ความเร็วเกจแปรผันตามค่า Stat spd ของตัวละครบวกกับ Delta Time  
+Enemy Turn (Bullet Hell Phase): อ้างอิงจาก Deltarune / Undertale เมื่อศัตรูโจมตี ฉากจะตัดเข้าสู่กล่องจำกัดพื้นที่ ผู้เล่นต้องบังคับหัวใจ (Soul) หลบห่าฝนกระสุนรูปแบบต่างๆ (Normal, Homing, Wave) มีระบบอมตะชั่วคราว (iframes) หลังโดนดาเมจ  
+Pacifist System (Spare/Act): ศัตรูมีเกจ enemy_spare_meter ผู้เล่นสามารถเลือกคำสั่ง Act (เช่น Talk) เพื่อเพิ่มเกจนี้ เมื่อเกจเต็ม 100% จะสามารถใช้คำสั่ง Spare เพื่อจบการต่อสู้แบบสันติได้  
+2. Unique Mechanic: The Performance-Reward System
+กลไกหลักที่ใช้แก้ Pain Point เรื่องความน่าเบื่อของเกม Turn-based โดยการให้รางวัลตามฝีมือการหลบหลีกในเฟส Bullet Hell:  
+Tier 1: Perfect Dodge (No-Hit)
+เงื่อนไข: หลบกระสุนได้ทั้งหมดโดยไม่โดนดาเมจเลยแม้แต่ครั้งเดียวในตานั้น  
+รางวัล: เกจ ATB จะเด้งเต็ม 100% ทันที (player_atb.ready = 1) ทำให้ผู้เล่นได้รับสิทธิ์ในเทิร์นนั้นทันทีเพื่อ Attack หรือ Act ได้ทันทีโดยไม่ต้องรอเกจวิ่งใหม่  
+ข้อจำกัด (Limiter): สามารถทำ Perfect Dodge เพื่อเอาเกจ ATB เต็มได้ สูงสุดแค่ 3 ครั้ง ต่อหนึ่งการต่อสู้เท่านั้น เพื่อไม่ให้ระบบโกงจนเสียสมดุล
+Tier 2: Survived (Hit but Alive)
+เงื่อนไข: โดนกระสุนโจมตี (ได้รับดาเมจ) แต่รอดชีวิตจนจบเฟส Bullet Hell  
+รางวัล: ได้รับบัฟ Haste 1 Turn (เพิ่มความเร็วเกจ ATB ขึ้น 30% หรือคูณโบนัสความเร็วชั่วคราวในตาถัดไป) เพื่อเป็นระบบช่วยประคองผู้เล่น (Catch-up Mechanism)  
+3. Current Code Architecture (Lua / LÖVE)
+โครงสร้างโค้ดที่สร้างไว้เป็นแบบ Production-Ready Architecture (แยกโมดูลผ่าน Dependency Injection):  
+init.lua: ตัวรวบรวมและเชื่อมต่อทุกโมดูลเข้าด้วยกัน  
+config.lua: เก็บค่าคงที่, สเตทของเกม (PHASE_COMMAND, PHASE_BULLET_HELL, PHASE_DIALOGUE) และบาลานซ์ต่างๆ  
+structs.lua & state.lua: เก็บข้อมูลตัวแปรส่วนกลาง (Shared State), เมนูคำสั่ง และ Visual Data  
+battle.lua: ควบคุม Loop หลักของฉากต่อสู้ (load, update, draw, exit)  
+bullet_hell.lua: คำนวณ Vector Maths, Homing/Wave Bullet Movement และ Collision Detection  
+commands.lua & input.lua: ดักจับปุ่มคุมและการประมวลผลคำสั่ง Attack / Act / Spare  
+draw.lua & layout.lua: จัดการ UI Layout, HP/SP/ATB Bar และการวาด Graphic เคลื่อนไหว  

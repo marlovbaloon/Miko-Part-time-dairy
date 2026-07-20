@@ -50,6 +50,7 @@ ffi.cdef[[
         float box_x, box_y;
         float box_w, box_h;
         int   perfect_dodge;
+        int   perfect_dodge_count;   // how many perfect-dodge rewards have been used this battle
         int   enemy_spare_meter;
         int   battle_ended;
         int   pacifist_end;

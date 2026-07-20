@@ -35,8 +35,9 @@ return function(M)
 
     function M._get_atb_speed(gauge)
         local s = gauge.speed
-        if gauge.bonus_timer > 0 then
-            s = s * config.CONFIG.ATB_BONUS_MULT
+        -- Haste: applies the stored multiplier (30% by default) while the buff has turns remaining
+        if gauge.bonus_timer > 0 and gauge.bonus_speed > 0 then
+            s = s * gauge.bonus_speed
         end
         return s
     end

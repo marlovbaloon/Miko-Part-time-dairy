@@ -23,6 +23,7 @@ return function(M)
         box.paused = 0
         box.dialogue_active = 0
         box.perfect_dodge = 0
+        box.perfect_dodge_count = 0
         box.enemy_spare_meter = 0
         box.battle_ended = 0
         box.pacifist_end = 0

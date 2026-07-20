@@ -26,8 +26,8 @@ config.BULLET_WAVE   = 3
 config.CONFIG = {
     ATB_MAX              = 100.0,
     ATB_BASE_SPEED       = 15.0,
-    ATB_BONUS_MULT       = 2.5,
-    ATB_BONUS_DURATION   = 3.0,
+    ATB_HASTE_MULT       = 1.3,   -- 30% temporary ATB speed boost after being hit
+    ATB_HASTE_TURNS      = 1,     -- Haste lasts exactly 1 player turn
     BULLET_POOL_SIZE     = 256,
     BULLET_HELL_DURATION = 8.0,
     BOX_MARGIN           = 60,
@@ -35,6 +35,11 @@ config.CONFIG = {
     SOUL_IFRAMES         = 1.0,
     SPARE_METER_MAX      = 100,
     FLIP_CHANCE          = 0.15,
+    MAX_PERFECT_DODGES   = 3,     -- cap on Perfect-Dodge full-ATB rewards per battle
 }
+
+-- Backward compatibility aliases (kept so external API stays the same)
+config.ATB_BONUS_MULT     = config.CONFIG.ATB_HASTE_MULT
+config.ATB_BONUS_DURATION = config.CONFIG.ATB_HASTE_TURNS
 
 return config

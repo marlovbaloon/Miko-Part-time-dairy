@@ -147,15 +147,25 @@ return function(M)
         box.paused = 0
 
         if box.perfect_dodge == 1 then
-            player_atb.current = config.CONFIG.ATB_MAX
-            player_atb.ready = 1
-            v.miss_text_timer = 1.5
-            M._push_dialogue("* You dodged flawlessly! ATB fully charged!")
-            M._set_phase(config.PHASE_DIALOGUE)
+            box.perfect_dodge_count = box.perfect_dodge_count + 1
+            if box.perfect_dodge_count <= config.CONFIG.MAX_PERFECT_DODGES then
+                -- Perfect Dodge reward: full ATB, capped at 3 uses per battle
+                player_atb.current = config.CONFIG.ATB_MAX
+                player_atb.ready = 1
+                v.miss_text_timer = 1.5
+                M._push_dialogue("* Perfect Dodge! ATB fully charged! (" .. box.perfect_dodge_count .. "/" .. config.CONFIG.MAX_PERFECT_DODGES .. ")")
+                M._set_phase(config.PHASE_DIALOGUE)
+            else
+                -- Limit reached: no full-ATB reward, but still no damage taken
+                M._push_dialogue("* Perfect dodge, but the Performance-Reward limit has been reached.")
+                M._set_phase(config.PHASE_DIALOGUE)
+            end
         else
-            player_atb.bonus_speed = 1.0
-            player_atb.bonus_timer = config.CONFIG.ATB_BONUS_DURATION
-            M._push_dialogue("* You took some damage. ATB recovering faster!")
+            -- Survived: grant Haste for the next player turn
+            player_atb.bonus_speed = config.CONFIG.ATB_HASTE_MULT
+            player_atb.bonus_timer = config.CONFIG.ATB_HASTE_TURNS
+            local haste_pct = math.floor((config.CONFIG.ATB_HASTE_MULT - 1) * 100)
+            M._push_dialogue("* You took some damage. Haste buff: +" .. haste_pct .. "% ATB speed for the next turn!")
             M._set_phase(config.PHASE_DIALOGUE)
         end
 
