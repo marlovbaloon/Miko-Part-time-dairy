@@ -54,7 +54,8 @@ function love.draw()
     
     love.graphics.setCanvas()
     love.graphics.draw(gameCanvas, offsetX, offsetY, 0, scale, scale)
-    controller.draw()
+    controller.draw() 
+    
 end
 
 function love.quit()

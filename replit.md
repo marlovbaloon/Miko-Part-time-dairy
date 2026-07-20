@@ -11,7 +11,7 @@ A 2D top-down LÖVE2D (Lua) game featuring Kaoru navigating her bedroom.
 ## How to run
 
 The workflow `Start application` runs the game automatically.  
-Command: `love 'Miko Part-time Dairy'`  
+Command: `love 'Miko Part-time Daily'`  
 Output type: **VNC** — the game appears in the VNC preview pane (not a browser tab).
 
 To start manually from the shell:

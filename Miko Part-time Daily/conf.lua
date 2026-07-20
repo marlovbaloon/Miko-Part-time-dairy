@@ -1,3 +1,4 @@
+--conf.lua
 function love.conf(t)
     t.window.title = "Miko Part-time Dairy"          -- ชื่อโปรเจกต์/ชื่อเกมมึง
     t.window.width = 320                      -- ความกว้างเริ่มต้น (ตรงกับ Virtual Width)

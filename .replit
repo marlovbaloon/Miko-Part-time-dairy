@@ -18,6 +18,7 @@ args = "Start application"
 
 [[workflows.workflow]]
 name = "Start application"
+mode = "sequential"
 author = "agent"
 
 [workflows.workflow.metadata]
@@ -25,4 +26,4 @@ outputType = "vnc"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "love 'Miko Part-time Dairy'"
+args = "love 'Miko Part-time Daily'"

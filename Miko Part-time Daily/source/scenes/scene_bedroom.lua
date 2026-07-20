@@ -32,7 +32,7 @@ end
 
 function bedroom.update(dt)
     if kaoru and kaoru.update then
-        kaoru:update(dt)
+        kaoru:update(dt, bedroom_map)
     end
     
     -- ลากกล้องวิ่งไล่ตามคาโอรุแบบสมูท

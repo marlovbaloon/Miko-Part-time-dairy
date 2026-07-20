@@ -95,13 +95,16 @@ function Tiles.draw(tile_type, world_x, world_y, camera)
     end
 
     local screen_pos = camera:toScreen(world_x, world_y, 0)
+    local scale = screen_pos.scale or 1.0 -- ดึงค่าซูมกล้องมาใช้ ถ้าไม่มีให้เป็น 1.0
 
     if Tiles.animations[tile_type] then
         local anim_obj = Tiles.animations[tile_type]
-        anim_obj.anim:draw(anim_obj.image, screen_pos.x, screen_pos.y)
+        -- [🎯 FIXED]: ยัดค่าสเกลซูมลงในตัวแอนิเมชัน (องศาหมุน = 0, scaleX, scaleY)
+        anim_obj.anim:draw(anim_obj.image, screen_pos.x, screen_pos.y, 0, scale, scale)
     elseif Tiles.sprites[tile_type] then
         local sprite = Tiles.sprites[tile_type]
-        love.graphics.draw(sprite.image, sprite.quad, screen_pos.x, screen_pos.y)
+        -- [🎯 FIXED]: ยัดค่าสเกลซูมลงในรูปภาพสไปรท์ธรรมดา (องศาหมุน = 0, scaleX, scaleY)
+        love.graphics.draw(sprite.image, sprite.quad, screen_pos.x, screen_pos.y, 0, scale, scale)
     end
 end
 
@@ -189,5 +192,32 @@ function Tiles.placeTileToMap(gx, gy, unique_tile_type, brush_obj)
         end
     }
 end
+-- =======================================================
+-- [NEW]: ฟังก์ชันโหลดแมปแบบอาเรย์ 2 มิติทีเดียวทั้งแผนที่
+-- =======================================================
+function Tiles.loadFullMap(map_matrix, brush_mapping)
+    if not map_matrix or type(map_matrix) ~= "table" then return end
 
+    -- แกะความกว้าง/สูงของ Matrix อัตโนมัติ
+    local room_h = #map_matrix
+    local room_w = map_matrix[1] and #map_matrix[1] or 0
+
+    -- วิ่งลูปสลับแกน (Row/Col -> X/Y ของระบบพิกัดโลก)
+    for row = 1, room_h do
+        for col = 1, room_w do
+            local tile_id = map_matrix[row][col]
+
+            -- หาพิกัดในระบบ Grid (เริ่มจาก 0)
+            local gx = col - 1
+            local gy = row - 1
+
+            -- ดึง Brush ที่ผูกไว้กับ ID ออกมาวาง
+            local brush = brush_mapping[tile_id]
+            if brush then
+                local unique_name = "autogen_" .. tostring(tile_id)
+                Tiles.placeTileToMap(gx, gy, unique_name, brush)
+            end
+        end
+    end
+end
 return Tiles
