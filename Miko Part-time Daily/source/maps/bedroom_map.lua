@@ -32,16 +32,16 @@ function bedroom_map.load()
         --  กำแพงล่องหนกั้นขอบบน (กั้นตรงพิกัดที่สิ้นสุดแนววาดกำแพงในใจมึง)
         { x = 0, y = 32, width = MAP_WIDTH, height = 8 }, 
         -- bed 
-        { x = 32 -16 , y = 32 + 16 , width = 32, height = 32 }, 
+        { id = "bed", x = 32 -16 , y = 32 + 16 , width = 32, height = 32 }, 
         -- wardrobe
-        { x = 32 + 16 + 32 , y = 32 + 16 , width = 32 + 14 , height = 32 - 16}, 
+        { id = "wardrobe", x = 32 + 16 + 32 , y = 32 + 16 , width = 32 + 14 , height = 32 - 16}, 
         -- โต๊ะเก้าอี้
-        { x = 32 + 16 + 32 + 60 , y = 32 + 16 + 16 - 16, width = 32 + 16 , height = 32 - 16}, 
+        { id = "desk",x = 32 + 16 + 32 + 60 , y = 32 + 16 + 16 - 16, width = 32 + 16 , height = 32 - 16}, 
     --  กำแพงล่องหนกั้นขอบล่าง (กั้นเหนือนอกพิกัดรูปภาพขยับขึ้นมา)
        { x = 0, y = MAP_HEIGHT - 16, width = MAP_WIDTH, height = 8 },
-        -- Fuma
-        { x = 32 - 28 , y = 64 + 32 + 16 , width = 16, height = 32 }, 
-        { x = 32 - 28 , y = 64 + 32 + 16 - 14, width = 16, height = 32 }, 
+        -- Fuma push
+       -- { x = 32 - 28 , y = 64 + 32 + 16 , width = 16, height = 32 }, 
+        {id = "fuma_push", x = 32 - 28 , y = 64 + 32 + 16 - 14, width = 16, height = 32 }, 
     --  กำแพงล่องหนกั้นฝั่งซ้าย
     { x = 0, y = 0, width = 2, height = MAP_HEIGHT },
 
@@ -104,7 +104,7 @@ function bedroom_map.draw()
         local box = bedroom_map.colliders[i]
         -- แปลงพิกัดกล่องชนในเกมให้เคลื่อนที่และซูมตามกล้อง
         local box_screen = myCamera:toScreen(box.x, box.y, 0)
-        love.graphics.rectangle("line", box_screen.x, box_screen.y, box.width * zoom, box.height * zoom)
+        --love.graphics.rectangle("line", box_screen.x, box_screen.y, box.width * zoom, box.height * zoom)
     end
 
     -- วาดตัวละครคาโอรุ

@@ -230,7 +230,7 @@ function kaoru:draw(camera_obj, virtualWidth, virtualHeight)
 
     -- [สายพัฒนาเกม] เส้นแสดงขอบเขตกล่องชนสีเขียว
     love.graphics.setColor(0, 1, 0, 0.5)
-    love.graphics.rectangle("line", draw_x + self.collider.x_offset * current_scale, draw_y + self.collider.y_offset * current_scale, self.collider.width * current_scale, self.collider.height * current_scale)
+    --love.graphics.rectangle("line", draw_x + self.collider.x_offset * current_scale, draw_y + self.collider.y_offset * current_scale, self.collider.width * current_scale, self.collider.height * current_scale)
 
     -- วาดสเตตัสเมนูทับเลเยอร์ตัวละคร เพื่อให้อยู่ด้านบนสุดเสมอ
     -- ส่งค่าขนาดหน้าจอเสมือนจริง (ค่า Default คือ 320x320 ตามสเปคของมึง)
