@@ -25,25 +25,20 @@ return function(M)
         soul.iframes = 0.0
 
         M._clear_bullets()
-        local pattern = box.turn_count % 3
-        if pattern == 1 then
+
+        -- Ask the enemy blueprint which pattern to run, then execute it.
+        local enemy_data = state._enemy_data
+        if enemy_data and enemy_data.select_next_pattern then
+            local pattern = enemy_data:select_next_pattern(enemy.current_hp, box.enemy_spare_meter)
+            if pattern then
+                pattern(M, bullets, box, soul)
+            end
+        else
+            -- Fallback: simple downward rain if no enemy data is loaded
             for i = 1, 20 do
                 local bx = box.box_x + math.random() * box.box_w
                 local by = box.box_y - 20 - math.random() * 100
                 M._spawn_bullet(bx, by, 0, 80 + math.random() * 60, 6, 6, config.BULLET_NORMAL, 5)
-            end
-        elseif pattern == 2 then
-            for i = 1, 12 do
-                local angle = (i / 12) * math.pi * 2
-                local bx = soul.x + math.cos(angle) * 120
-                local by = soul.y + math.sin(angle) * 120
-                M._spawn_bullet(bx, by, 0, 0, 8, 8, config.BULLET_HOMING, 8)
-            end
-        else
-            for i = 1, 30 do
-                local bx = box.box_x + (i / 30) * box.box_w
-                local by = box.box_y + math.sin(i * 0.5) * 30
-                M._spawn_bullet(bx, by, -40, 0, 5, 5, config.BULLET_WAVE, 4)
             end
         end
 

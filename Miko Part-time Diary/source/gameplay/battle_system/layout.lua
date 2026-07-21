@@ -20,8 +20,8 @@ return function(M)
             v.enemy_target_x  = screen_w - margin - 120
         end
 
-        v.player_y = center_y
-        v.enemy_y  = center_y
+        v.player_y = box.box_y - 60
+        v.enemy_y  = box.box_y - 60
 
         box.box_w = 280
         box.box_h = 200

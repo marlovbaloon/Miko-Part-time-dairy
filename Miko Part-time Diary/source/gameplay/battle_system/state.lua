@@ -34,6 +34,8 @@ return {
         show_submenu = false,
         hp_bar_x = 0,
         hp_bar_y = 0,
+        enemy_sprite = nil,
+        enemy_damage_flash = 0,
     },
 
     _callbacks = {

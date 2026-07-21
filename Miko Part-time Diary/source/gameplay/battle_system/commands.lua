@@ -33,6 +33,7 @@ return function(M)
         enemy.current_hp = enemy.current_hp - dmg
 
         v.shake_timer = 0.2
+        v.enemy_damage_flash = 0.2
 
         if enemy.current_hp <= 0 then
             enemy.current_hp = 0
@@ -55,13 +56,20 @@ return function(M)
     end
 
     function M._execute_act(act_cmd)
-        if act_cmd == config.ACT_CHECK then
-            M._push_dialogue("* Enemy looks determined.\n* ATK " .. enemy.atk .. " DEF " .. enemy.def .. ".")
-            M._set_phase(config.PHASE_DIALOGUE)
+        -- Find the act definition injected by enemy_loader
+        local act = nil
+        for _, a in ipairs(state._act_submenu) do
+            if a.cmd == act_cmd or a.id == act_cmd then
+                act = a
+                break
+            end
+        end
+        if not act then return end
 
-        elseif act_cmd == config.ACT_SPARE then
+        -- Spare is a special win condition gated by the spare meter
+        if act.is_spare or act.id == "spare" then
             if box.enemy_spare_meter >= config.CONFIG.SPARE_METER_MAX then
-                M._push_dialogue("* You spared the enemy peacefully.")
+                M._push_dialogue(act.dialogue or "* You spared the enemy peacefully.")
                 box.battle_ended = 1
                 box.pacifist_end = 1
                 M._set_phase(config.PHASE_RESULT)
@@ -69,15 +77,19 @@ return function(M)
                 M._push_dialogue("* The enemy is not ready to be spared yet.")
                 M._set_phase(config.PHASE_DIALOGUE)
             end
-
-        elseif act_cmd == config.ACT_TALK then
-            box.enemy_spare_meter = box.enemy_spare_meter + 25
-            if box.enemy_spare_meter > config.CONFIG.SPARE_METER_MAX then
-                box.enemy_spare_meter = config.CONFIG.SPARE_METER_MAX
-            end
-            M._push_dialogue("* You tried to talk to the enemy.\n* Their willingness increased!")
-            M._set_phase(config.PHASE_DIALOGUE)
+            return
         end
+
+        -- Generic act: modify spare meter and show the enemy-specific dialogue
+        box.enemy_spare_meter = box.enemy_spare_meter + (act.spare_add or 0)
+        if box.enemy_spare_meter > config.CONFIG.SPARE_METER_MAX then
+            box.enemy_spare_meter = config.CONFIG.SPARE_METER_MAX
+        end
+
+        if act.dialogue then
+            M._push_dialogue(act.dialogue)
+        end
+        M._set_phase(config.PHASE_DIALOGUE)
     end
 
     function M._cmd_sp()
@@ -86,6 +98,7 @@ return function(M)
             local dmg = math.max(1, player.atk * 2 - enemy.def)
             enemy.current_hp = enemy.current_hp - dmg
             v.shake_timer = 0.3
+            v.enemy_damage_flash = 0.3
             M._push_dialogue("* You cast a spell!")
             M._set_phase(config.PHASE_DIALOGUE)
         else

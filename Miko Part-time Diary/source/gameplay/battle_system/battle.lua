@@ -5,6 +5,8 @@ return function(M)
     local structs = require("source.gameplay.battle_system.structs")
     local state   = require("source.gameplay.battle_system.state")
     local config  = require("source.gameplay.battle_system.config")
+    local enemy_loader = require("source.gameplay.youkai.enemy_loader")
+    local states_manager = require("source.states_manager")
 
     local box        = structs.state
     local player     = structs.player
@@ -14,9 +16,8 @@ return function(M)
     local soul       = structs.soul
     local v          = state._visuals
 
-    function M.load(saveData, enemyData)
-        saveData = saveData or {}
-        enemyData = enemyData or {}
+    function M.start(enemy_id)
+        enemy_id = enemy_id or "kudagitsune"
 
         box.phase = config.PHASE_IDLE
         box.turn_count = 0
@@ -30,26 +31,18 @@ return function(M)
 
         box.side_flipped = (math.random() < config.CONFIG.FLIP_CHANCE) and 1 or 0
 
-        player.max_hp     = saveData.max_hp or 100
-        player.current_hp = saveData.current_hp or player.max_hp
-        player.atk        = saveData.atk or 10
-        player.def        = saveData.def or 5
-        player.spd        = saveData.spd or 12
-        player.sp         = saveData.sp or 20
-        player.max_sp     = saveData.max_sp or 20
-
-        enemy.max_hp     = enemyData.max_hp or 80
-        enemy.current_hp = enemyData.current_hp or enemy.max_hp
-        enemy.atk        = enemyData.atk or 8
-        enemy.def        = enemyData.def or 4
-        enemy.spd        = enemyData.spd or 10
-        enemy.sp         = 0
-        enemy.max_sp     = 0
+        player.max_hp     = 100
+        player.current_hp = 100
+        player.atk        = 10
+        player.def        = 5
+        player.spd        = 12
+        player.sp         = 20
+        player.max_sp     = 20
 
         M._reset_atb(player_atb)
         M._reset_atb(enemy_atb)
         player_atb.speed = config.CONFIG.ATB_BASE_SPEED * (1.0 + player.spd * 0.05)
-        enemy_atb.speed  = config.CONFIG.ATB_BASE_SPEED * (1.0 + enemy.spd * 0.05)
+        -- Enemy speed is injected by enemy_loader below
 
         soul.x = 0; soul.y = 0
         soul.speed = config.CONFIG.SOUL_SPEED
@@ -64,10 +57,16 @@ return function(M)
         v.show_submenu = false
         v.shake_timer = 0
         v.miss_text_timer = 0
+        v.enemy_damage_flash = 0
 
-        state._dialogue_queue = enemyData.dialogues or {}
+        state._dialogue_queue = {}
         state._dialogue_index = 0
         state._dialogue_timer = 0
+
+        -- Load youkai blueprint and inject stats / acts / dialogue / sprite into battle state
+        local enemy_data = enemy_loader.load(enemy_id)
+        enemy_loader.inject_to_battle(enemy_data, state, structs)
+        enemy_atb.speed = config.CONFIG.ATB_BASE_SPEED * (1.0 + enemy.spd * 0.05)
 
         local sw = love.graphics.getWidth()
         local sh = love.graphics.getHeight()
@@ -75,10 +74,20 @@ return function(M)
         v.player_x = v.player_target_x
         v.enemy_x  = v.enemy_target_x
 
-        M._trigger("on_battle_start", saveData, enemyData)
+        M._trigger("on_battle_start", {}, enemy_data)
 
         M._set_phase(config.PHASE_COMMAND)
         box.turn_count = 1
+    end
+
+    function M.load(saveData, enemy_id)
+        -- Deprecated compatibility wrapper.
+        -- Old callers passed battle.load(saveData, enemy_id); new code uses battle.start(enemy_id).
+        if type(saveData) == "string" and enemy_id == nil then
+            enemy_id = saveData
+        end
+        print("[battle_system] M.load is deprecated; use M.start(enemy_id) instead")
+        M.start(enemy_id)
     end
 
     function M.update(dt)
@@ -92,6 +101,11 @@ return function(M)
             if v.shake_timer <= 0 then
                 v.shake_x = 0; v.shake_y = 0
             end
+        end
+
+        if v.enemy_damage_flash and v.enemy_damage_flash > 0 then
+            v.enemy_damage_flash = v.enemy_damage_flash - dt
+            if v.enemy_damage_flash < 0 then v.enemy_damage_flash = 0 end
         end
 
         if v.miss_text_timer > 0 then
@@ -152,12 +166,15 @@ return function(M)
 
         love.graphics.setColor(0.4, 0.7, 1.0, 1)
         love.graphics.rectangle("fill", v.player_x, v.player_y, 80, 120)
-        love.graphics.setColor(1.0, 0.3, 0.3, 1)
-        love.graphics.rectangle("fill", v.enemy_x, v.enemy_y, 80, 120)
+        M._draw_enemy_sprite()
 
         love.graphics.setColor(1, 1, 1, 1)
         love.graphics.print("PLAYER", v.player_x, v.player_y - 20)
-        love.graphics.print("ENEMY", v.enemy_x, v.enemy_y - 20)
+        if state._enemy_data then
+            love.graphics.print(state._enemy_data.name:upper(), v.enemy_x - 20, v.enemy_y - 20)
+        else
+            love.graphics.print("ENEMY", v.enemy_x, v.enemy_y - 20)
+        end
 
         if box.phase == config.PHASE_COMMAND or box.phase == config.PHASE_SUBMENU then
             M._draw_command_ui()

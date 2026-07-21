@@ -14,6 +14,7 @@ return function(M)
     local soul       = structs.soul
     local bullets    = structs.bullets
     local v          = state._visuals
+    local enemy_data = state._enemy_data
 
     function M._draw_command_ui()
         local sw = love.graphics.getWidth()
@@ -147,6 +148,37 @@ return function(M)
         if math.floor(love.timer.getTime() * 3) % 2 == 0 then
             love.graphics.setColor(1, 1, 1, 0.6)
             love.graphics.print("▼", sw - 50, sh - 40)
+        end
+    end
+
+    function M._draw_enemy_sprite()
+        if v.enemy_sprite then
+            local x = v.enemy_x
+            local y = v.enemy_y
+
+            -- Apply shake offset from the shared shake timer
+            if v.shake_timer > 0 then
+                x = x + (math.random() - 0.5) * 4
+                y = y + (math.random() - 0.5) * 4
+            end
+
+            -- Damage flash: brighten the sprite briefly when the enemy is hurt
+            local r, g, b = 1, 1, 1
+            if v.enemy_damage_flash and v.enemy_damage_flash > 0 then
+                local flash = v.enemy_damage_flash * 2
+                r = 1 + flash
+                g = 1 + flash
+                b = 1 + flash
+            end
+            love.graphics.setColor(r, g, b, 1)
+
+            local ox = v.enemy_sprite:getWidth() * 0.5
+            local oy = v.enemy_sprite:getHeight() * 0.5
+            love.graphics.draw(v.enemy_sprite, x, y, 0, 1, 1, ox, oy)
+        else
+            -- Fallback: colored rectangle if no sprite is available
+            love.graphics.setColor(1.0, 0.3, 0.3, 1)
+            love.graphics.rectangle("fill", v.enemy_x, v.enemy_y, 80, 120)
         end
     end
 

@@ -11,7 +11,7 @@ A 2D top-down LÖVE2D (Lua) game featuring Kaoru navigating her bedroom.
 ## How to run
 
 The workflow `Start application` runs the game automatically.  
-Command: `love 'Miko Part-time Daily'`  
+Command: `love 'Miko Part-time Diary'`  
 Output type: **VNC** — the game appears in the VNC preview pane (not a browser tab).
 
 To start manually from the shell:
@@ -37,6 +37,12 @@ Miko Part-time Dairy/
 │   ├── states_manager.lua     # Scene/state machine
 │   ├── title_menu.lua         # Title screen
 │   ├── input.lua              # Input handling
+│   ├── gameplay/
+│   │   ├── battle_system/     # Pure battle engine (runner)
+│   │   ├── date_time_system/  # In-game date/time standalone cluster
+│   │   └── youkai/            # Enemy data blueprints & loader
+│   │       ├── enemy_loader.lua
+│   │       └── kudagitsune.lua
 │   ├── libs/
 │   │   ├── camera.lua         # 2D top-down camera (lerp follow)
 │   │   ├── anim8.lua          # Animation library
@@ -48,6 +54,7 @@ Miko Part-time Dairy/
 │       └── scene_bedroom.lua  # Bedroom scene logic
 └── data/
     └── dialogue/              # JSON dialogue files
+        └── youkai/            # Per-youkai dialogue overrides
 ```
 
 ## User preferences

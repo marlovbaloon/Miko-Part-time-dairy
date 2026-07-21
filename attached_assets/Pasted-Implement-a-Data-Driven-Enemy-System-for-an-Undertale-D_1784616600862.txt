@@ -1,0 +1,86 @@
+Implement a Data-Driven Enemy System for an Undertale/Deltarune-style combat framework (LÖVE2D / Lua). The core battle_system must act strictly as a Pure Engine / Runner, while individual enemy files act as Data & Behavior Blueprints. No overworld encounter logic is needed.
+
+🛠️ Step-by-Step Task Execution Protocol
+Step 1: Directory & Asset Structure Setup
+Action: Create a dedicated directory for enemy data definitions at source/gameplay/enemies/ (or assets/youkai/).
+
+Files to create:
+
+source/gameplay/enemies/enemy_loader.lua (Central Loader Module).
+
+source/gameplay/enemies/kudagitsune.lua (First Data Blueprint instance).
+
+Step 2: Define the Enemy Script Contract (Data Schema)
+Action: In kudagitsune.lua, construct and return a standard Lua table acting as a contract/interface.
+
+Fields to implement in the table:
+
+Base Attributes: id (string), name (string), max_hp (number), spd (number), sprite (file path string).
+
+Act Commands Table (acts): An array of tables containing id, label, description, spare_add (value to modify spare meter), and dialogue string.
+
+Dialogue Set (dialogues): Contains intro text, spareable text, and a turn_quotes array for mid-battle speech bubbles.
+
+Bullet Hell Callbacks (patterns): A dictionary mapping pattern names to callback functions: function(bullets_table, box_bounds, soul_pos).
+
+AI Logic Handler (select_next_pattern): A method function(self, current_hp, spare_meter) returning the appropriate pattern function based on battle state.
+
+Step 3: Build the enemy_loader.lua Module
+Action: Implement dynamic loading and state injection logic in enemy_loader.lua.
+
+Tasks for AI Agent:
+
+Define enemy_loader.load(enemy_id).
+
+Use require or love.filesystem.load to load the file dynamically based on enemy_id.
+
+Pre-load the enemy sprite texture via love.graphics.newImage() and store it within the loaded object's visual reference.
+
+Define enemy_loader.inject_to_battle(enemy_data, state, structs) to map enemy fields to global battle state:
+
+Map enemy stats into structs.enemy.
+
+Transform enemy_data.acts and inject directly into state._act_submenu.
+
+Push enemy_data.dialogues.intro into state._dialogue_queue.
+
+Step 4: Integrate with battle_system Workflow
+Action: Modify the initialization entry point of battle_system (e.g., battle_system.setup or battle_system.start).
+
+Tasks for AI Agent:
+
+Remove any hardcoded enemy stats/actions currently in battle_system.
+
+Require enemy_loader.lua.
+
+Accept enemy_id as a parameter when triggering a battle.
+
+Invoke enemy_loader.load(enemy_id) and pass the returned schema to enemy_loader.inject_to_battle.
+
+Step 5: Update Rendering Logic in draw.lua
+Action: Connect rendering routines to pull dynamically from the populated state.
+
+Tasks for AI Agent:
+
+Enemy Sprite (_draw_enemy_sprite):
+
+Bind rendering to state._visuals.enemy_sprite.
+
+Anchor the sprite position relative to the top of the Bullet Hell box (box.box_y).
+
+Apply shake offsets using box.shake_timer and flash effects during damage states.
+
+ACT Submenu (_draw_command_ui):
+
+Maintain iteration over state._act_submenu without modifying the rendering loop structure (rely on enemy_loader pre-populating this array).
+
+Speech / Dialogue Box (_draw_dialogue):
+
+Ensure the dialogue renderer pulls strings directly from state._dialogue_queue populated by enemy_data.dialogues.
+
+🎯 Architecture Constraints & Verification Criteria
+Zero Hardcoding: battle_system.lua and draw.lua must contain ZERO references to specific enemy names, specific ACT labels, or specific attack pattern code.
+
+Polymorphic Execution: Adding a new enemy (nekomata.lua) must require ONLY creating the new file and passing "nekomata" into battle_system.start().
+
+Clean State Separation: Keep rendering functions pure — draw.lua only reads from state and structs, never modifies enemy data directly.
