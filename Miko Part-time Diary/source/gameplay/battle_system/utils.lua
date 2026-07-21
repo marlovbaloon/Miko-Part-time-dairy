@@ -1,5 +1,6 @@
 -- battle_system/utils.lua
 -- Private helpers and the callback trigger system
+-- [StrictLua] Uses typed declarations for local numeric variables.
 
 return function(M)
     local structs = require("source.gameplay.battle_system.structs")
@@ -27,14 +28,15 @@ return function(M)
     end
 
     function M._reset_atb(gauge)
-        gauge.current = 0.0
-        gauge.ready = 0
-        gauge.bonus_speed = 0.0
-        gauge.bonus_timer = 0.0
+        gauge.current      = 0.0
+        gauge.ready        = 0
+        gauge.bonus_speed  = 0.0
+        gauge.bonus_timer  = 0.0
     end
 
     function M._get_atb_speed(gauge)
-        local s = gauge.speed
+        -- [StrictLua] s is a mutable float; typed at declaration site.
+        float s = gauge.speed
         -- Haste: applies the stored multiplier (30% by default) while the buff has turns remaining
         if gauge.bonus_timer > 0 and gauge.bonus_speed > 0 then
             s = s * gauge.bonus_speed
@@ -43,14 +45,15 @@ return function(M)
     end
 
     function M._spawn_bullet(bx, by, bvx, bvy, bw, bh, btype, dmg)
-        for i = 0, config.CONFIG.BULLET_POOL_SIZE - 1 do
+        integer pool_size = config.CONFIG.BULLET_POOL_SIZE
+        for i = 0, pool_size - 1 do
             local b = bullets[i]
             if b.active == 0 then
-                b.x = bx; b.y = by
+                b.x = bx;   b.y  = by
                 b.vx = bvx; b.vy = bvy
-                b.w = bw; b.h = bh
-                b.type = btype or config.BULLET_NORMAL
-                b.damage = dmg or 1
+                b.w = bw;   b.h  = bh
+                b.type   = btype or config.BULLET_NORMAL
+                b.damage = dmg   or 1
                 b.lifetime = config.CONFIG.BULLET_HELL_DURATION + 2.0
                 b.active = 1
                 return i
@@ -60,14 +63,15 @@ return function(M)
     end
 
     function M._clear_bullets()
-        for i = 0, config.CONFIG.BULLET_POOL_SIZE - 1 do
+        integer pool_size = config.CONFIG.BULLET_POOL_SIZE
+        for i = 0, pool_size - 1 do
             bullets[i].active = 0
         end
     end
 
-    function M._clamp(val, min, max)
-        if val < min then return min end
-        if val > max then return max end
+    function M._clamp(val, mn, mx)
+        if val < mn then return mn end
+        if val > mx then return mx end
         return val
     end
 

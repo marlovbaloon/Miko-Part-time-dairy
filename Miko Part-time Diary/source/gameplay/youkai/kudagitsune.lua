@@ -1,14 +1,25 @@
 -- source/gameplay/youkai/kudagitsune.lua
 -- Data-driven blueprint for the Kudagitsune (pipe fox spirit) youkai.
+-- [StrictLua] Stat constants declared with typed syntax before the table.
 
+-- ── Stat declarations ────────────────────────────────────────────────────────
+string YOUKAI_ID     = "kudagitsune"
+string YOUKAI_NAME   = "Kudagitsune"
+integer YOUKAI_MAX_HP = 80
+integer YOUKAI_ATK    = 8
+integer YOUKAI_DEF    = 4
+integer YOUKAI_SPD    = 10
+string YOUKAI_SPRITE  = "assets/images/youkai/kudagitsune.png"
+
+-- ── Blueprint table ──────────────────────────────────────────────────────────
 local kudagitsune = {
-    id = "kudagitsune",
-    name = "Kudagitsune",
-    max_hp = 80,
-    atk = 8,
-    def = 4,
-    spd = 10,
-    sprite = "assets/images/youkai/kudagitsune.png",
+    id     = YOUKAI_ID,
+    name   = YOUKAI_NAME,
+    max_hp = YOUKAI_MAX_HP,
+    atk    = YOUKAI_ATK,
+    def    = YOUKAI_DEF,
+    spd    = YOUKAI_SPD,
+    sprite = YOUKAI_SPRITE,
 
     -- Act commands available against this youkai
     acts = {
@@ -17,7 +28,7 @@ local kudagitsune = {
             label = "Check",
             description = "Examine the enemy.",
             spare_add = 0,
-            dialogue = "* Kudagitsune - a small fox spirit bound to a pipe.\n* ATK 8 DEF 4.",
+            dialogue = "* Kudagitsune - a small fox spirit bound to a pipe.\n* ATK " .. YOUKAI_ATK .. " DEF " .. YOUKAI_DEF .. ".",
         },
         {
             id = "spare",
@@ -37,10 +48,10 @@ local kudagitsune = {
 
     -- Battle dialogue strings (overridden if data/dialogue/youkai/kudagitsune.lua exists)
     dialogues = {
-        intro = "* Kudagitsune scurries out from a bamboo pipe!",
-        spareable = "* Kudagitsune seems ready to listen.",
+        intro = "* " .. YOUKAI_NAME .. " scurries out from a bamboo pipe!",
+        spareable = "* " .. YOUKAI_NAME .. " seems ready to listen.",
         turn_quotes = {
-            "* Kudagitsune's tail flickers nervously.",
+            "* " .. YOUKAI_NAME .. "'s tail flickers nervously.",
             "* The pipe spirit chitters softly.",
             "* A faint warmth drifts from the bamboo pipe.",
         },
@@ -78,7 +89,7 @@ local kudagitsune = {
 
     -- AI: pick the next bullet-hell pattern based on battle state
     select_next_pattern = function(self, current_hp, spare_meter)
-        local hp_pct = current_hp / self.max_hp
+        float hp_pct = current_hp / self.max_hp
         if spare_meter >= 100 then
             return self.patterns.wave
         elseif hp_pct > 0.7 then

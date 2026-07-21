@@ -1,0 +1,55 @@
+Create a lightweight Lua-to-Lua transpiler that implements Static Typing and Strict Syntax for Lua files without modifying the underlying Lua C engine.
+
+🛠️ Task Specification
+1. The Syntax Rules (The "StrictLua" Spec)
+Implement a parser that recognizes these patterns and converts them to standard Lua:
+
+Typed Declarations:
+
+integer var = 10 → local var = 10 (with runtime assertion check)
+
+string name = "Miko" → local name = "Miko"
+
+boolean active = true → local active = true
+
+Assertion Logic: For every typed declaration, the transpiler must inject a hidden type-check:
+
+Example: integer x = 10 → local x = 10; assert(type(x) == "number", "Type mismatch: x must be integer")
+
+Constant Enforcement:
+
+const int speed = 5 → (Implement using Lua setmetatable or simply inject a comment warning if reassigned).
+
+2. The Transpiler Implementation (transpiler.lua)
+Create a script that reads an input .lua file, regex-parses the custom types, transforms them into standard Lua, and writes to a build/ directory.
+
+Requirement: Must support multi-file parsing (entire project).
+
+3. The "Zero-Require" Injection (The Magic)
+Create a Bootstrap Loader (bootstrap.lua) that sits at the entry point (main.lua).
+
+This script should:
+
+Scan all files in source/.
+
+Transpile .lua files on-the-fly (or build-time).
+
+Load the transpiled code into _G (Global Environment) so the rest of the project doesn't need require for the transpiler itself.
+
+📝 The Prompt to Paste to AI Agent:
+"Act as a Senior Software Architect. I need to implement a transpilation layer called 'StrictLua' for my LÖVE2D project.
+
+Requirement: Create a Lua script source/strict_lua_transpiler.lua that scans my source directory. It should parse custom syntax (e.g., integer x = 10) and transform it into standard Lua with assert(type(x) == 'number') injections.
+
+Type System: Support integer, string, boolean, and float.
+
+Workflow: The system must handle an entire project. Create a bootstrap.lua that automates this process so that I can write integer bullet = 10 in any file and it works after my transpilation build step.
+
+No Engine Change: Do not touch the C source of Lua. The transpilation must produce valid standard Lua files.
+
+Output: Provide the logic for the Regex pattern matcher that handles these declarations and the build script that automates the transformation of the entire source/ folder."
+
+💡 คำแนะนำเพิ่มเติมจากกู:
+ปัญหาเรื่อง Line Number: เวลาโค้ดบึ้ม assert จะบอกว่า Error ที่บรรทัดของ Lua ที่ถูกแปลงแล้ว (ซึ่งมึงอาจจะงง) มึงต้องบอกให้ AI เพิ่มการทำ Source Map ง่ายๆ ไว้ในคอมเมนต์ (เช่น -- Original line: 45) เพื่อให้มึงรู้ว่าบรรทัดที่พังในไฟล์ต้นฉบับคือตรงไหน
+
+การใช้งานจริง: การทำแบบนี้มึงจะมี Build Step เพิ่มขึ้นมา 1 ขั้น คือก่อนกด r (หรือ love .) มึงต้องสั่ง lua build_script.lua ให้มันแปลงไฟล์ก่อนเสมอ (แนะนำให้ทำ alias ใน Termux เป็น alias b='lua build_script.lua && love .')
