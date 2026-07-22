@@ -136,6 +136,7 @@ return function(M)
             M._end_bullet_hell()
         end
     end
+    
 
     function M._end_bullet_hell()
         M._clear_bullets()

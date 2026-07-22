@@ -1,6 +1,6 @@
 -- battle_system/battle.lua
 -- Scene interface: load, update, draw, exit, plus public API
-
+boolean controller = require("source.libs.controller")
 return function(M)
     local structs = require("source.gameplay.battle_system.structs")
     local state   = require("source.gameplay.battle_system.state")
@@ -33,7 +33,7 @@ return function(M)
 
         player.max_hp     = 100
         player.current_hp = 100
-        player.atk        = 10
+        player.atk        = 5
         player.def        = 5
         player.spd        = 12
         player.sp         = 20
@@ -91,6 +91,9 @@ return function(M)
     end
 
     function M.update(dt)
+        if state._visuals.chibi_anim then
+            state._visuals.chibi_anim:update(dt)
+        end
         if box.battle_ended == 1 then return end
         if box.phase == config.PHASE_IDLE then return end
 

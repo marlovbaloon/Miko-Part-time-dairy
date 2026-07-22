@@ -112,7 +112,12 @@ return function(M)
         else
             love.graphics.setColor(1, 0.2, 0.5, 1)
         end
-        love.graphics.circle("fill", soul.x, soul.y, soul.hitbox_r)
+        if v.chibi_anim then
+            v.chibi_anim:draw(v.chibi_image, soul.x, soul.y, 0, 1, 1, v.chibi_ox, v.chibi_oy)
+        else
+            love.graphics.circle("fill", soul.x, soul.y, soul.hitbox_r)
+        end
+       
 
         integer pool_size = config.CONFIG.BULLET_POOL_SIZE
         for i = 0, pool_size - 1 do

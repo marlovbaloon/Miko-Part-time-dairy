@@ -81,49 +81,52 @@ end
 --
 -- Matched patterns:
 --   [const ]  <type>  <identifier>  =  <rest>
-local function match_declaration(line, line_n)
-    -- Strip leading whitespace for analysis (preserve it for indentation).
-    local indent, rest = line:match("^(%s*)(.*)")
-    if not rest then return nil end
+local function match_declaration(line, line_n, declared_vars)
+local indent, rest = line:match("^(%s*)(.*)")
+if not rest then return nil end
 
-    -- Check for const prefix
-    local is_const = false
-    local maybe_const = rest:match("^const%s+(.*)")
-    if maybe_const then
-        is_const = true
-        rest = maybe_const
-    end
+local is_const = false
+local maybe_const = rest:match("^const%s+(.*)")
+if maybe_const then
+    is_const = true
+    rest = maybe_const
+end
 
-    -- Match: <strict_type>  <identifier>  =  <expr>
-    -- NOTE: Lua patterns do NOT support | alternation, so we match the keyword
-    -- token first and validate it against the known type set.
-    local strict_kw = rest:match("^(%a+)")
-    if not strict_kw or not STRICT_TO_LUA_TYPE[strict_kw] then return nil end
-    local after_kw = rest:sub(#strict_kw + 1)
-    local var_name, expr = after_kw:match("^%s+([%a_][%w_]*)%s*=%s*(.+)$")
-    if not var_name then return nil end
+local strict_kw = rest:match("^(%a+)")
+if not strict_kw or not STRICT_TO_LUA_TYPE[strict_kw] then return nil end
+local after_kw = rest:sub(#strict_kw + 1)
+local var_name, expr = after_kw:match("^%s+([%a_][%w_]*)%s*=%s*(.+)$")
+if not var_name then return nil end
 
-    -- Guard: if the identifier itself is a Lua keyword, skip.
-    if LUA_KEYWORDS[var_name] then return nil end
+if LUA_KEYWORDS[var_name] then return nil end
 
-    local lua_type = STRICT_TO_LUA_TYPE[strict_kw]
-    if not lua_type then return nil end
+local lua_type = STRICT_TO_LUA_TYPE[strict_kw]
+if not lua_type then return nil end
 
-    -- Strip trailing comment from expr to avoid double-commenting.
-    local clean_expr = expr:match("^(.-)%s*%-%-.*$") or expr
-    clean_expr = clean_expr:match("^(.-)%s*$") -- rtrim
+local clean_expr = expr:match("^(.-)%s*%-%-.*$") or expr
+clean_expr = clean_expr:match("^(.-)%s*$")
 
-    -- Build output lines
-    local decl   = indent .. "local " .. var_name .. " = " .. clean_expr
-    local assert_line = indent .. make_assert(var_name, lua_type, strict_kw, line_n)
+-- 👈 [จุดสำคัญ] เช็คว่าเคยประกาศไปหรือยัง
+local is_already_declared = declared_vars and declared_vars[var_name]
 
-    local lines = { decl, assert_line }
+local decl
+if is_already_declared then
+    -- ถ้าเคยประกาศแล้ว: ไม่ต้องใส่ local (ใช้ตัวแปรเดิม ไม่สร้างใหม่ในแรม)
+    decl = indent .. var_name .. " = " .. clean_expr
+else
+    -- ถ้าเพิ่งเคยเจอครั้งแรก: ประกาศ local ใหม่
+    decl = indent .. "local " .. var_name .. " = " .. clean_expr
+end
 
-    if is_const then
-        table.insert(lines, indent .. make_const_comment(var_name, line_n))
-    end
+local assert_line = indent .. make_assert(var_name, lua_type, strict_kw, line_n)
+local lines = { decl, assert_line }
 
-    return table.concat(lines, "\n"), is_const
+if is_const then
+    table.insert(lines, indent .. make_const_comment(var_name, line_n))
+end
+
+-- ส่ง var_name กลับไปด้วยเพื่อนำไปบันทึก
+return table.concat(lines, "\n"), is_const, var_name
 end
 
 -- ──────────────────────────────────────────────────────────────────────────────
@@ -168,6 +171,7 @@ function transpiler.transpile(source, filename)
 
     local out_lines  = {}
     local const_names = {}
+    local declared_vars = {}
     local changed    = false
 
     -- Header comment so the build/ file is clearly machine-generated.
@@ -178,9 +182,12 @@ function transpiler.transpile(source, filename)
     end
 
     for n, line in ipairs(in_lines) do
-        local transformed, is_const = match_declaration(line, n)
+        local transformed, is_const, var_name = match_declaration(line, n, declared_vars)
         if transformed then
             changed = true
+            if var_name then
+                declared_vars[var_name] = true
+            end
             -- Preserve any original line comment from the source as a reference
             local src_comment = line:match("%s*%-%-(.+)$")
             if src_comment then
