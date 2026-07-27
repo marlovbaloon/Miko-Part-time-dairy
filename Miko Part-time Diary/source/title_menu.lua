@@ -1,6 +1,6 @@
 -- source/title_menu.lua
 local menu = {}
-local state = require("source.states_manager")
+local state = require("source.core.states_manager")
 
 menu.selectedOption = 1 -- 1 = start, 2 = quit 
 menu.menuBGM = nil
@@ -10,7 +10,7 @@ local moveThisFrame = false
 local actionThisFrame = false
 
 function menu.load()
-    menu.menuBGM = love.audio.newSource("soundtracks/ost/Title_Theme.mp3", "stream")
+    menu.menuBGM = love.audio.newSource("assets/audio/Title_Theme.mp3", "stream")
     menu.menuBGM:setLooping(true)
     menu.menuBGM:setVolume(0.5)
     menu.menuBGM:play()

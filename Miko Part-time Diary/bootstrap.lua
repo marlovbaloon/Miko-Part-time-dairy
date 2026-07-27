@@ -23,11 +23,11 @@ _G.__strictlua_installed = true
 -- Load the transpiler before we override require.
 -- Use the raw LÖVE filesystem read + load directly so we don't recurse.
 -- ──────────────────────────────────────────────────────────────────────────────
-local transpiler_src = love.filesystem.read("source/strict_lua_transpiler.lua")
+local transpiler_src = love.filesystem.read("source/core/strict_lua_transpiler.lua")
 if not transpiler_src then
-    error("[StrictLua] Cannot read source/strict_lua_transpiler.lua")
+    error("[StrictLua] Cannot read source/core/strict_lua_transpiler.lua")
 end
-local transpiler_chunk, err = load(transpiler_src, "@source/strict_lua_transpiler.lua")
+local transpiler_chunk, err = load(transpiler_src, "@source/core/strict_lua_transpiler.lua")
 if not transpiler_chunk then
     error("[StrictLua] Failed to compile transpiler: " .. tostring(err))
 end
@@ -77,29 +77,23 @@ end
 -- For everything else: fall through to the original require unchanged.
 -- ──────────────────────────────────────────────────────────────────────────────
 local _orig_require = require
-
 _G.require = function(mod_name)
-    -- Already loaded? Return the cached value.
     local cached = package.loaded[mod_name]
     if cached ~= nil then return cached end
 
-    -- Our domain: source.* and data.*
-    -- Skip the transpiler itself (already loaded above without transpilation).
+    
     if (mod_name:match("^source%.") or mod_name:match("^data%."))
-        and mod_name ~= "source.strict_lua_transpiler"
+        and mod_name ~= "source.core.strict_lua_transpiler"
     then
         local ok, result = strictlua_load(mod_name)
         if ok then
             package.loaded[mod_name] = result
             return result
         elseif result then
-            -- result is a non-nil error string → hard error
             error(result, 2)
         end
-        -- result == nil → not found in our filesystem, fall through to original
     end
 
-    -- Fall back to standard require (handles love.*, standard libs, C modules, etc.)
     return _orig_require(mod_name)
 end
 

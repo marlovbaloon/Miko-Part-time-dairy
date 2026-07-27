@@ -3,7 +3,7 @@
 -- Scans source/ (and data/) for .lua files, transpiles them to build/.
 -- Usage from shell:  lua build_script.lua [--verbose] [--check]
 
-local transpiler = require("source.strict_lua_transpiler")
+local transpiler = require("source.core.strict_lua_transpiler")
 
 -- ──────────────────────────────────────────────────────────────────────────────
 -- Config

@@ -1,25 +1,25 @@
--- source/scenes/scene_bedroom.lua
-local bedroom = {}
-local kaoru = require("source.entities.kaoru")
-local bedroom_map = require("source.maps.bedroom_map") 
-local interact = require("source.interact") -- [🎯 NEW]: ดึงโมดูลระบบปฏิสัมพันธ์เข้ามาใช้งาน
+-- source/scenes/scene_kitchen.lua
+local kitchen = {}
+local kaoru = require("source.kaoru")
+local kitchen_map = require("source.maps.kitchen_map") 
+local interact = require("source.interact") --ดึงโมดูลระบบปฏิสัมพันธ์เข้ามาใช้งาน
 local saveRef = nil 
 local is_map_initialized = false -- ตัวกันบั๊กรันโหลดแมปซ้ำซ้อน
 
-function bedroom.load(saveData)
+function kitchen.load(saveData)
     saveRef = saveData 
 
     -- =======================================================
     -- [🎯 FIXED]: สั่งให้ไฟล์ Map รันระบบโหลดภาพพื้นไม้และเล่นเพลงทันที!
     -- =======================================================
-    if bedroom_map.init and not is_map_initialized then
-        bedroom_map.init()
+    if kitchen_map.init and not is_map_initialized then
+        kitchen_map.init()
         is_map_initialized = true
     end
 
     -- [🎯 NEW]: โหลดฐานข้อมูลบทสนทนาประจำด่านห้องนอนเข้ามาเตรียมพร้อม
     if interact.loadDatabase then
-        interact.loadDatabase("data/dialogue/bedroom_table.json")
+        interact.loadDatabase("data/dialogue/kitchen_table.json")
     end
 
     -- โหลดข้อมูลสไปรต์ตัวละครคาโอรุ
@@ -36,15 +36,15 @@ function bedroom.load(saveData)
     end
 end
 
-function bedroom.update(dt)
+function kitchen.update(dt)
     -- [🎯 NEW]: อัปเดตระบบตรวจสอบการชนวัตถุสำรวจ และอัปเดตแอนิเมชันพิมพ์ตัวอักษรของกล่องข้อความ
-    -- ส่งค่า dt, table ของตัวละคร kaoru, และ table ของ bedroom_map เข้าไปคำนวณ
+    -- ส่งค่า dt, table ของตัวละคร kaoru, และ table ของ kitchen_map เข้าไปคำนวณ
     if interact and interact.update then
-        interact.update(dt, kaoru, bedroom_map)
+        interact.update(dt, kaoru, kitchen_map)
     end
 
     if kaoru and kaoru.update then
-        kaoru:update(dt, bedroom_map)
+        kaoru:update(dt, kitchen_map)
     end
 
     -- ลากกล้องวิ่งไล่ตามคาโอรุแบบสมูท
@@ -53,9 +53,9 @@ function bedroom.update(dt)
     end 
 end
 
-function bedroom.draw()
+function kitchen.draw()
     -- ดึงโครงสร้างกราฟิกและฟังก์ชันวาดพื้น/ผนังทั้งหมดมาแสดงผล
-    bedroom_map.draw()
+    kitchen_map.draw()
 
     -- [🎯 NEW]: วาดกล่องข้อความ UI (Interact) ไว้บรรทัดล่างสุดเพื่อให้อยู่เลเยอร์บนสุดของจอ
     -- ส่งขนาดหน้าจอ Virtual Resolution (สมมติว่าใช้ 320x240 หรือตามสเกลโปรเจกต์เดิมของมึง)
@@ -65,18 +65,18 @@ function bedroom.draw()
     end
 end
 
-function bedroom.keypressed(key)
+function kitchen.keypressed(key)
     if kaoru.keypressed then
         kaoru:keypressed(key)
     end
 end
 
-function bedroom.exit()
+function kitchen.exit()
     -- หยุดเพลงเวลาเปลี่ยนฉากย้ายออกจากห้องนอน
-    if bedroom_map.destroy then
-        bedroom_map.destroy()
+    if kitchen_map.destroy then
+        kitchen_map.destroy()
     end
     is_map_initialized = false
 end
 
-return bedroom
+return kitchen
