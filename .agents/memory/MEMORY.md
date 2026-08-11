@@ -1,1 +1,0 @@
-- [Project folder name](project-path.md) — the workspace folder is named `Miko Part-time Diary`, not `Miko Part-time Daily`.
