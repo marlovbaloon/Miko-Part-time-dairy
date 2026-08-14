@@ -1,9 +1,9 @@
--- src/maps/map_bedroom.lua
+- src/maps/map_bedroom.lua 
 local MapManager = require("src.maps.map_manager")
 
 local map_bedroom = MapManager.new({
-    bg_path   = "assets/images/backgrounds/kitchen.png",
-    mask_path = "assets/mask/kitchen_mask.png",
+    bg_path   = "assets/images/backgrounds/kaoru_bedroom.png",
+    mask_path = "assets/mask/bedroom_mask.png",
     bgm_name  = "Kaoru_Home",
     spawn     = { x = 45, y = 50 },
     grid_size = 8, -- Precision scanning (8x8 px)
